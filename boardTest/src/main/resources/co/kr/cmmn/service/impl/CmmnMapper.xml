@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="co.kr.cmmn.service.impl.CmmnMapper">
+	<select id="getList" resultType="co.kr.cmmn.BoardVo">
+		select * from board order by id asc
+	</select>
+	<select id="info" parameterType="int" resultType="co.kr.cmmn.BoardVo">
+		select * from board where id = #{id}
+	</select>
+	<insert id="write" parameterType="co.kr.cmmn.BoardVo">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		insert into board
+							(
+							id,
+							title,
+							content,
+							name,
+							regDate
+							)
+					values
+							(
+							#{id},
+							#{title},
+							#{content},
+							#{name},
+							#{regDate}
+							)
+	</insert>
+	<update id="edit" parameterType="co.kr.cmmn.BoardVo">
+		update board set
+						title = #{title},
+						content = #{content},
+						name = #{name},
+						regDate = #{regDate}
+				where
+						id = #{id}
+	</update>
+	<delete id="delete" parameterType="co.kr.cmmn.BoardVo">
+		delete from board
+					where
+							id = #{id}
+	</delete>
+	
+	<select id="count" resultType="int">
+		<![CDATA[
+		select count(id) from board
+		where id > 0
+		]]>
+	</select>
+	
+	<select id="page" resultType="co.kr.cmmn.BoardVo" parameterType="co.kr.cmmn.Criteria">
+		select
+			id, title, content, name, regDate 
+		from
+			(
+				select 
+					id, title, content, name, regDate, row_number() over(order by id desc) as rNum 
+				from
+					board
+			)
+		where rNum between #{rowStart} and #{rowEnd} order by id desc
+	</select>
+	
+<!-- 	<select id="page" resultType="co.kr.cmmn.BoardVo" parameterType="co.kr.cmmn.Criteria"> -->
+<!-- 	<![CDATA[ -->
+<!-- 		SELECT -->
+<!--     * -->
+<!-- 		FROM -->
+<!-- 		    ( -->
+<!-- 		        select -->
+<!-- 		            rownum as id, title, content, name, regDate -->
+<!-- 		        from -->
+<!-- 		            board -->
+<!-- 		        where  -->
+<!-- 		            rownum <= #{rowEnd} order by id asc -->
+<!-- 		    ) -->
+<!-- 		where -->
+<!--     		id >= #{rowStart} order by id desc -->
+<!-- 			]]> -->
+<!-- 	</select> -->
+	
+<!-- 	<select id="page" resultType="co.kr.cmmn.BoardVo" parameterType="co.kr.cmmn.Criteria"> -->
+<!-- 		<![CDATA[select id, title, content, name, regDate from ( -->
+<!-- 		select ROWNUM rn, id, title, content, name, regDate from board -->
+<!-- 		where ROWNUM <= #{rowEnd}                                                                          -->
+<!-- 		) -->
+<!-- 		where rn > (#{rowStart})]]> -->
+<!-- 	</select> -->
+</mapper>
